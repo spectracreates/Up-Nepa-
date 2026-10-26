@@ -71,28 +71,68 @@ const refreshDetail = debounce(loadDetail, 1200);
 function setLive(ok) { const el = $("live"); el.classList.toggle("on", ok); el.querySelector("span").textContent = ok ? "Live" : "Offline"; }
 
 // ---------- location ----------
-function locate() {
-  if (!("geolocation" in navigator)) { $("locLine").textContent = "Location not supported"; return; }
+// Phones: get a quick network-based fix first (works indoors), then refine with GPS in the background.
+const UA = navigator.userAgent || "";
+const IN_APP = /FBAN|FBAV|Instagram|Line\/|Snapchat|TikTok|; wv\)|WhatsApp/i.test(UA);
+const IOS = /iPhone|iPad|iPod/i.test(UA);
+let watchId = null, gotFix = false;
+
+function locHelp(msg) { const el = $("locHelp"); el.textContent = msg || ""; el.hidden = !msg; }
+
+async function locate() {
+  if (!("geolocation" in navigator) || !window.isSecureContext) {
+    $("locLine").textContent = "Location not available";
+    locHelp("This browser can't share location here. Open the site in Chrome or Safari, or tap Change to pick your area.");
+    $("locBtn").hidden = true;
+    return;
+  }
+  try {
+    const st = await navigator.permissions?.query({ name: "geolocation" });
+    if (st && st.state === "denied") return onPosErr({ code: 1 });
+  } catch {}
   $("locLine").textContent = "Finding your location…";
-  navigator.geolocation.getCurrentPosition(onPos, onPosErr, { enableHighAccuracy: true, timeout: 15000, maximumAge: 120000 });
+  locHelp("");
+  gotFix = false;
+  // 1) fast, low-accuracy fix (cell/Wi-Fi), accepts a recent cached position
+  navigator.geolocation.getCurrentPosition(onPos, (e) => {
+    // 2) if that fails for a reason other than permission, try GPS with more time
+    if (e.code === 1) return onPosErr(e);
+    navigator.geolocation.getCurrentPosition(onPos, onPosErr, { enableHighAccuracy: true, timeout: 30000, maximumAge: 0 });
+  }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 });
+  // 3) refine with GPS for up to 45s without blocking
+  if (watchId != null) navigator.geolocation.clearWatch(watchId);
+  watchId = navigator.geolocation.watchPosition((p) => {
+    onPos(p);
+    if (p.coords.accuracy <= 100) { navigator.geolocation.clearWatch(watchId); watchId = null; }
+  }, () => {}, { enableHighAccuracy: true, timeout: 45000, maximumAge: 0 });
+  setTimeout(() => { if (watchId != null) { navigator.geolocation.clearWatch(watchId); watchId = null; } }, 45000);
 }
 function onPos(p) {
-  S.pos = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy };
-  $("locBtn").hidden = true;
+  const next = { lat: p.coords.latitude, lng: p.coords.longitude, acc: p.coords.accuracy };
+  if (S.pos && gotFix && next.acc > S.pos.acc) return; // keep the better fix
+  S.pos = next; gotFix = true;
+  $("locBtn").hidden = true; locHelp("");
   let best = null;
   for (const a of S.areas) { const d = dist(S.pos, a); if (!best || d < best.dist) best = { area: a, dist: d }; }
+  const changed = !S.nearest || !best || S.nearest.area.slug !== best.area.slug;
   S.nearest = best;
   if (best && best.dist <= 6000) {
-    if (!S.manual || !S.selected) select(best.area.slug, false);
+    if ((!S.manual || !S.selected) && (changed || S.selected !== best.area.slug)) select(best.area.slug, false);
   } else {
     $("locLine").textContent = "You seem to be outside Lagos";
     if (!S.selected) openSheet();
   }
-  renderHero(); renderMap(true);
+  renderHero(); renderMap(changed);
 }
 function onPosErr(e) {
+  if (gotFix) return; // a later attempt already worked
   $("locBtn").hidden = false;
-  $("locLine").textContent = e.code === 1 ? "Location blocked" : "Couldn't get location";
+  $("locLine").textContent = e.code === 1 ? "Location blocked" : e.code === 3 ? "Location timed out" : "Couldn't get location";
+  if (IN_APP) locHelp("You're inside another app's browser, which blocks location. Tap ⋮ or the share icon and choose Open in Chrome (or Safari).");
+  else if (e.code === 1) locHelp(IOS
+    ? "Location is blocked. On iPhone: Settings > Privacy & Security > Location Services > Safari Websites > While Using. Then tap 'Use my location'."
+    : "Location is blocked for this site. Tap the icon left of the web address > Permissions > Location > Allow. Then tap 'Use my location'.");
+  else locHelp("Turn on Location in your phone's quick settings, then tap 'Use my location'. Or tap Change to pick your area.");
   if (!S.selected) { $("areaLga").textContent = "Turn on location, or tap Change to pick your area"; }
   renderHero();
 }
@@ -312,4 +352,9 @@ async function boot() {
 }
 boot();
 
-if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+if ("serviceWorker" in navigator) {
+  const hadController = !!navigator.serviceWorker.controller;
+  // when a new version takes over, reload once so phones run the latest code
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (hadController && !sessionStorage.getItem("swr")) { sessionStorage.setItem("swr", "1"); location.reload(); } });
+  addEventListener("load", () => navigator.serviceWorker.register("sw.js").then((r) => r.update()).catch(() => {}));
+}
