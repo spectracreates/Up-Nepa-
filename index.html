@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Up NEPA · Lagos light status</title>
+<meta name="description" content="Live, crowd-verified power status for every part of Lagos. See if light dey before you reach house.">
+<meta name="theme-color" content="#121410" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f1ea" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Up NEPA · Is there light in your area?">
+<meta property="og:description" content="Live power status for every part of Lagos, confirmed by neighbours.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+<link rel="preconnect" href="https://dztgtjrysndwnlvvrums.supabase.co">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">Up <span>NEPA</span></div>
+    <div class="live" id="live"><i></i><span>Connecting</span></div>
+  </header>
+
+  <!-- Your area -->
+  <section class="hero" id="hero" aria-live="polite">
+    <div class="meter">
+      <div class="row"><span id="locLine">Finding your location…</span><span id="clock">--:--</span></div>
+      <div class="big" id="bigStatus">CHECKING…</div>
+      <div class="row"><span id="confLine">Waiting for reports</span><span id="ageLine"></span></div>
+    </div>
+    <div class="area-head">
+      <div>
+        <h1 id="areaName">Your area</h1>
+        <p class="muted" id="areaLga">Allow location so we can find your area</p>
+      </div>
+      <button class="chip" id="changeArea" type="button">Change</button>
+    </div>
+    <div class="votes" id="votes" aria-hidden="true"><i class="v-on"></i><i class="v-off"></i></div>
+    <p class="muted small" id="voteNote">Nobody has reported this area in the last 6 hours.</p>
+    <div class="actions">
+      <button class="btn up" id="btnUp" type="button">Light don come!</button>
+      <button class="btn down" id="btnDown" type="button">Dem don take am</button>
+    </div>
+    <p class="note" id="actionNote">Report only what you can see where you are right now.</p>
+    <button class="link" id="locBtn" type="button" hidden>Use my location</button>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" aria-selected="true" data-tab="pattern" id="t-pattern">Pattern</button>
+    <button role="tab" aria-selected="false" data-tab="map" id="t-map">Map</button>
+    <button role="tab" aria-selected="false" data-tab="areas" id="t-areas">All areas</button>
+    <button role="tab" aria-selected="false" data-tab="notices" id="t-notices">Notices</button>
+  </nav>
+
+  <section class="panel" id="p-pattern" role="tabpanel" aria-labelledby="t-pattern">
+    <div class="label">When light usually comes · last 30 days</div>
+    <div class="chart" id="chart"></div>
+    <div class="hours"><span>12am</span><span>6am</span><span>12pm</span><span>6pm</span><span>11pm</span></div>
+    <p class="insight" id="insight">Once a few people report, you'll see when this area usually gets light.</p>
+    <div class="label">Recent reports</div>
+    <ul class="log" id="log"></ul>
+    <p class="muted small" id="logEmpty">Nothing reported here in the last 7 days.</p>
+  </section>
+
+  <section class="panel" id="p-map" role="tabpanel" aria-labelledby="t-map" hidden>
+    <div id="map" aria-label="Map of Lagos areas coloured by power status"></div>
+    <div class="legend"><span><i class="lg on"></i>Light on</span><span><i class="lg off"></i>Light off</span><span><i class="lg mix"></i>Mixed</span><span><i class="lg none"></i>No reports</span></div>
+  </section>
+
+  <section class="panel" id="p-areas" role="tabpanel" aria-labelledby="t-areas" hidden>
+    <input id="q" type="search" placeholder="Search area or LGA: Ketu, Ikorodu, Eti-Osa…" autocomplete="off" aria-label="Search areas">
+    <div class="filters" id="filters">
+      <button class="chip on" data-f="all" type="button">All</button>
+      <button class="chip" data-f="on" type="button">Light on</button>
+      <button class="chip" data-f="off" type="button">No light</button>
+      <button class="chip" data-f="active" type="button">Reported</button>
+    </div>
+    <ul class="list" id="list"></ul>
+  </section>
+
+  <section class="panel" id="p-notices" role="tabpanel" aria-labelledby="t-notices" hidden>
+    <ul class="notices" id="notices"></ul>
+  </section>
+
+  <details class="how">
+    <summary>How the status is worked out</summary>
+    <p>Each phone counts once per area: only its latest report in the last 6 hours is used, and a report loses half its weight every hour. Reports sent from within about 3.5km of the area, with good GPS, count fully; others count less. <b>Confirmed</b> needs 3 GPS-verified neighbours with at least 3 in 4 agreeing. Your exact location is checked and then thrown away, never stored.</p>
+  </details>
+  <footer class="foot">Crowd reports, not DisCo data. Built in Lagos.</footer>
+</div>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+    <div class="sheet-head"><h2 id="sheetTitle">Choose your area</h2><button class="chip" id="sheetClose" type="button">Close</button></div>
+    <input id="sq" type="search" placeholder="Search area or LGA" autocomplete="off" aria-label="Search areas">
+    <ul class="list" id="slist"></ul>
+  </div>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin="" defer></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
