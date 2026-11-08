@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Up NEPA · The grid record</title>
+<meta name="description" content="Every published figure on Nigeria's grid since 2020, with sources. Conflicts shown. No verdict attached.">
+<meta name="theme-color" content="#121410" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f1ea" media="(prefers-color-scheme: light)">
+<meta property="og:title" content="Has the light actually improved?">
+<meta property="og:description" content="Four numbers describe Nigeria's electricity and they move in different directions. All of them, with sources.">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="styles.css">
+<style>
+.rec{max-width:760px;margin:0 auto;padding:calc(12px + env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) calc(40px + env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));display:grid;gap:26px}
+.rec .back{all:unset;cursor:pointer;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:17px;max-width:46ch;margin:0}
+.lede b{font-weight:600}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.kpi{background:var(--lcd);color:var(--lcd-ink);border-radius:10px;padding:12px 14px;font-family:var(--mono);display:grid;gap:3px;box-shadow:inset 0 2px 0 rgba(0,0,0,.12);min-width:0}
+.kpi .k{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;opacity:.85}
+.kpi .v{font-size:27px;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi .u{font-size:10.5px;opacity:.8}
+.sec{display:grid;gap:10px}
+.label{font-family:var(--mono);font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.sec h2{font-size:clamp(20px,5vw,26px);line-height:1.15;text-wrap:balance;max-width:22ch}
+.sec p{margin:0;max-width:64ch}
+.fig{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;display:grid;gap:10px;min-width:0}
+.fig svg{display:block;width:100%;height:auto;max-width:100%}
+.cap{font-size:13px;color:var(--muted)}
+.scroll{overflow-x:auto;min-width:0}
+.scroll svg,.scroll table{min-width:540px}
+.switch{display:flex;flex-wrap:wrap;gap:8px}
+.switch button{all:unset;cursor:pointer;font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;padding:9px 13px;border-radius:999px;border:1px solid var(--line);background:var(--bg);color:var(--muted)}
+.switch button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.switch button:focus-visible{outline:2px solid var(--on);outline-offset:2px}
+.readout{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--on);border-radius:14px;padding:14px;display:grid;gap:8px}
+.readout .rng{font-family:var(--mono);font-size:clamp(20px,5.5vw,27px);line-height:1.1;font-variant-numeric:tabular-nums}
+.readout .wt{font-size:14px;color:var(--muted)}
+.readout .en{font-size:14px}
+.readout .en b{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);margin-bottom:2px;font-weight:500}
+table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13px}
+caption{text-align:left;font-family:var(--body);font-size:13px;color:var(--muted);padding-bottom:8px}
+th,td{padding:8px 9px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+thead th{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1.5px solid var(--ink);font-weight:500}
+tbody tr:last-child td{border-bottom:none}
+td.up{color:var(--ok)}
+td.dn{color:var(--mix)}
+.steps{display:grid}
+.step{display:grid;grid-template-columns:7.5rem 1fr auto;gap:12px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--line)}
+.step:last-child{border-bottom:none}
+.step .wn{font-family:var(--mono);font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.step .wt{font-size:14px;min-width:0}
+.step .rt{font-family:var(--mono);font-size:16px;font-variant-numeric:tabular-nums;white-space:nowrap}
+@media (max-width:420px){.step{grid-template-columns:1fr auto}.step .wn{grid-column:1/-1}}
+.pair{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.blk{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px;display:grid;gap:5px;min-width:0}
+.blk h3{margin:0;font-family:var(--mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.blk .big{font-family:var(--mono);font-size:19px;font-variant-numeric:tabular-nums}
+.blk p{margin:0;font-size:13.5px;color:var(--muted)}
+.conflict{background:var(--panel);border:1px solid var(--line);border-top:4px solid var(--mix);border-radius:14px;padding:14px;display:grid;gap:9px}
+.conflict ul{margin:0;padding-left:18px;display:grid;gap:5px;font-size:14px}
+.lims{display:grid;border-top:1px solid var(--line)}
+.lim{display:grid;grid-template-columns:32px 1fr;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);align-items:start}
+.lim .n{font-family:var(--mono);font-size:11.5px;color:var(--on);-webkit-text-stroke:.4px var(--ink);padding-top:2px}
+.lim p{margin:0;font-size:14px}
+.src{display:grid;gap:6px;font-size:13.5px;color:var(--muted)}
+.src a{color:inherit;text-decoration:underline;text-underline-offset:2px;overflow-wrap:anywhere}
+.foot{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);border-top:1.5px solid var(--ink);padding-top:12px;display:flex;flex-wrap:wrap;gap:6px 18px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="rec">
+
+  <header style="display:grid;gap:12px">
+    <div class="top">
+      <div class="brand">Up <span>NEPA</span></div>
+      <a class="back" href="./">← Live status</a>
+    </div>
+    <h1>Has the light actually improved?</h1>
+    <p class="lede">Four different numbers describe Nigeria's electricity, and they move in different directions. <b>This page shows all four, with sources, and takes no position on what they mean.</b></p>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi"><span class="k">Installed capacity</span><span class="v">13,625</span><span class="u">MW · 28 plants</span></div>
+    <div class="kpi"><span class="k">Actually delivered</span><span class="v">4,112.72</span><span class="u">MWh/h · 2026 Q1</span></div>
+    <div class="kpi"><span class="k">Plant availability</span><span class="v">32.72%</span><span class="u">of installed · 2026 Q1</span></div>
+    <div class="kpi"><span class="k">Gas supplied</span><span class="v">43%</span><span class="u">of what plants need</span></div>
+  </div>
+
+  <section class="sec">
+    <div class="label">Figure 1 — The long view</div>
+    <h2>Average generation capacity, 2020 to 2025</h2>
+    <p>This series spans the handover. The dip is 2022; recovery runs through 2023, flattens in 2024, rises in 2025. Across six years the change is a rise of about 14% over 2020.</p>
+    <div class="fig">
+      <div class="scroll">
+        <svg viewBox="0 0 720 320" role="img" aria-label="Average generation capacity by year: 2020 4,050 MW; 2021 4,119; 2022 3,941; 2023 4,201; 2024 4,178; 2025 4,634.">
+          <g stroke="var(--line)" stroke-width="1">
+            <line x1="70" y1="260" x2="700" y2="260"/><line x1="70" y1="200" x2="700" y2="200"/>
+            <line x1="70" y1="140" x2="700" y2="140"/><line x1="70" y1="80" x2="700" y2="80"/>
+            <line x1="70" y1="20" x2="700" y2="20"/>
+          </g>
+          <g font-family="JetBrains Mono, monospace" font-size="11" fill="var(--muted)" text-anchor="end">
+            <text x="60" y="264">0</text><text x="60" y="204">1,500</text><text x="60" y="144">3,000</text>
+            <text x="60" y="84">4,500</text><text x="60" y="24">6,000</text>
+          </g>
+          <g fill="var(--off)">
+            <rect x="90.5" y="98.0" width="64" height="162.0"/>
+            <rect x="195.5" y="95.2" width="64" height="164.8"/>
+            <rect x="300.5" y="102.4" width="64" height="157.6"/>
+          </g>
+          <g fill="var(--on)">
+            <rect x="405.5" y="91.9" width="64" height="168.1"/>
+            <rect x="510.5" y="92.9" width="64" height="167.1"/>
+            <rect x="615.5" y="74.7" width="64" height="185.3"/>
+          </g>
+          <g font-family="JetBrains Mono, monospace" font-size="11.5" fill="var(--ink)" text-anchor="middle">
+            <text x="122.5" y="90">4,050</text><text x="227.5" y="87">4,119</text><text x="332.5" y="94">3,941</text>
+            <text x="437.5" y="84">4,201</text><text x="542.5" y="85">4,178</text><text x="647.5" y="67">4,634</text>
+          </g>
+          <line x1="390" y1="20" x2="390" y2="275" stroke="var(--mix)" stroke-width="1.5" stroke-dasharray="5 4"/>
+          <text x="396" y="34" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--mix)">MAY 2023 HANDOVER</text>
+          <line x1="70" y1="260" x2="700" y2="260" stroke="var(--ink)" stroke-width="1.5"/>
+          <g font-family="JetBrains Mono, monospace" font-size="12" fill="var(--ink)" text-anchor="middle">
+            <text x="122.5" y="282">2020</text><text x="227.5" y="282">2021</text><text x="332.5" y="282">2022</text>
+            <text x="437.5" y="282">2023</text><text x="542.5" y="282">2024</text><text x="647.5" y="282">2025</text>
+          </g>
+          <text x="70" y="308" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">MEGAWATTS · AVERAGE GENERATION CAPACITY</text>
+        </svg>
+      </div>
+      <p class="cap">2023 is a split year: the handover fell at the end of May, so that bar covers five months of one administration and seven of the next. Source: sector data reported by Vanguard, March 2026.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="label">Figure 2 — The gap</div>
+    <h2>What exists, what can move, what arrives</h2>
+    <p>Installed capacity is the number quoted in speeches. The grid has never carried more than 5,801.84 MW in a single day, and the quarterly average sits well below that.</p>
+    <div class="fig">
+      <div class="scroll">
+        <svg viewBox="0 0 720 230" role="img" aria-label="Installed 13,625 MW; wheeling capacity 8,700; best day 5,801.84; delivered average 4,112.72.">
+          <g font-family="JetBrains Mono, monospace" font-size="11" fill="var(--muted)" text-anchor="end">
+            <text x="168" y="38">INSTALLED</text><text x="168" y="83">CAN BE WHEELED</text>
+            <text x="168" y="128">BEST EVER DAY</text><text x="168" y="173">DELIVERED, AVG</text>
+          </g>
+          <rect x="180" y="20" width="500" height="30" fill="var(--line)"/>
+          <rect x="180" y="65" width="319.3" height="30" fill="var(--off)" opacity="0.5"/>
+          <rect x="180" y="110" width="212.9" height="30" fill="var(--off)"/>
+          <rect x="180" y="155" width="150.9" height="30" fill="var(--on)"/>
+          <g font-family="JetBrains Mono, monospace" font-size="12.5" fill="var(--ink)">
+            <text x="690" y="40" text-anchor="end">13,625</text><text x="509" y="85">8,700</text>
+            <text x="403" y="130">5,801.84</text><text x="341" y="175">4,112.72</text>
+          </g>
+          <line x1="180" y1="195" x2="680" y2="195" stroke="var(--ink)" stroke-width="1.5"/>
+          <g font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">
+            <text x="180" y="212">0</text><text x="680" y="212" text-anchor="end">13,625 MW</text>
+          </g>
+        </svg>
+      </div>
+      <p class="cap">Best-ever day recorded 4 March 2025. Delivered figure is the 2026 Q1 average hourly generation. Transmission figure is the company's own stated wheeling capability. Sources: NERC 2026 Q1 report; Energy Transition Africa.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="label">Interactive — Read the claim</div>
+    <h2>Four numbers, four different arguments</h2>
+    <p>Most electricity arguments are two people using different metrics. Pick one and see what it measures, and what kind of statement it supports.</p>
+    <div class="switch" role="group" aria-label="Choose a metric">
+      <button type="button" data-metric="installed" aria-pressed="true">Installed</button>
+      <button type="button" data-metric="available" aria-pressed="false">Available</button>
+      <button type="button" data-metric="peak" aria-pressed="false">Peak</button>
+      <button type="button" data-metric="delivered" aria-pressed="false">Delivered</button>
+    </div>
+    <div class="readout" aria-live="polite">
+      <div class="rng" id="r-range">13,000 – 14,000 MW</div>
+      <div class="wt" id="r-what">Nameplate capacity of every grid-connected plant added together, whether or not it is running.</div>
+      <div class="en"><b>Supports a claim like</b><span id="r-en">"Nigeria has over 13,000 megawatts of capacity." True, and says nothing about supply.</span></div>
+    </div>
+    <p class="cap">Ranges as classified by the Association of Power Generation Companies, reported by Daily Trust, April 2026. Peak is a momentary high point, not sustained output.</p>
+  </section>
+
+  <section class="sec">
+    <div class="label">Figure 3 — Quarter by quarter</div>
+    <h2>Volatile, not a straight line</h2>
+    <div class="fig">
+      <div class="scroll">
+        <table>
+          <caption>Average available generation capacity, selected quarters. Gaps are quarters not covered by the sources used here, not missing data.</caption>
+          <thead><tr><th scope="col">Quarter</th><th scope="col">Available capacity</th><th scope="col">Change</th></tr></thead>
+          <tbody>
+            <tr><td>2023 Q3</td><td>4,211.44 MW</td><td>—</td></tr>
+            <tr><td>2023 Q4</td><td>4,922 MW</td><td class="up">+710.56</td></tr>
+            <tr><td>2024 Q1</td><td>4,249 MW</td><td class="dn">−673.00</td></tr>
+            <tr><td>2024 Q4</td><td>5,296.89 MW</td><td class="up">+1,047.89</td></tr>
+            <tr><td>2025 Q1</td><td>5,366.88 MW</td><td class="up">+69.99</td></tr>
+            <tr><td>2025 Q3</td><td>5,430 MW</td><td class="up">+63.12</td></tr>
+            <tr><td>2026 Mar</td><td>4,089 MW</td><td class="dn">−1,341.00</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <p class="cap">Available capacity is not electricity delivered. Where NERC reports both: 2024 Q4 delivered 4,207.41 MWh/h against 5,296.89 MW available; 2025 Q1 delivered 4,770.59 MWh/h against 5,366.88 MW available.</p>
+  </section>
+
+  <section class="sec">
+    <div class="label">Figure 4 — What it costs</div>
+    <h2>The tariff moved faster than the supply</h2>
+    <p>In April 2024 customers were split by how many hours they receive. Band A, promised at least 20 hours a day and roughly 15% of about 12 million customers, was repriced. Everyone else stayed on the old rates.</p>
+    <div class="fig">
+      <div class="steps">
+        <div class="step"><span class="wn">Before Apr 2024</span><span class="wt">All residential customers, one rate band</span><span class="rt">₦66–68</span></div>
+        <div class="step"><span class="wn">3 Apr 2024</span><span class="wt">Band A repriced by supplementary order</span><span class="rt">₦225.00</span></div>
+        <div class="step"><span class="wn">6 May 2024</span><span class="wt">Reduced after parliamentary pushback</span><span class="rt">₦206.80</span></div>
+        <div class="step"><span class="wn">1 Jul 2024</span><span class="wt">Adjusted upward again</span><span class="rt">₦209.50</span></div>
+      </div>
+    </div>
+    <div class="pair">
+      <div class="blk"><h3>Subsidy, 2024 full year</h3><span class="big">₦1.94trn</span><p>Federal obligation for the year, despite the repricing.</p></div>
+      <div class="blk"><h3>Subsidy, 2024 Q4 → 2025 Q1</h3><span class="big">₦471.69bn → ₦536.4bn</span><p>A rise of 13.7% across the two quarters.</p></div>
+    </div>
+    <p class="cap">Rates per kilowatt-hour, before VAT and fixed charges. Sources: NERC orders as reported by Nairametrics, Leadership and KPMG Nigeria.</p>
+  </section>
+
+  <section class="sec">
+    <div class="label">Figure 5 — The neighbours</div>
+    <h2>Availability, not capacity, is the difference</h2>
+    <p>South Africa was in a worse electricity crisis than Nigeria in 2023. It recovered mainly by getting existing plants running again, not by building new ones. That makes plant availability the fairest number to compare.</p>
+    <div class="fig">
+      <div class="scroll">
+        <svg viewBox="0 0 720 200" role="img" aria-label="Plant availability: Nigeria 32.72 percent in 2026 Q1; South Africa Eskom 67.79 percent in 2026.">
+          <g font-family="JetBrains Mono, monospace" font-size="11.5" fill="var(--muted)" text-anchor="end">
+            <text x="168" y="52">NIGERIA 2026 Q1</text>
+            <text x="168" y="122">SOUTH AFRICA 2026</text>
+          </g>
+          <rect x="180" y="26" width="500" height="36" fill="var(--line)"/>
+          <rect x="180" y="26" width="163.6" height="36" fill="var(--mix)"/>
+          <rect x="180" y="96" width="500" height="36" fill="var(--line)"/>
+          <rect x="180" y="96" width="338.95" height="36" fill="var(--ok)"/>
+          <g font-family="JetBrains Mono, monospace" font-size="16" fill="var(--ink)">
+            <text x="354" y="52">32.72%</text>
+            <text x="529" y="122">67.79%</text>
+          </g>
+          <line x1="180" y1="150" x2="680" y2="150" stroke="var(--ink)" stroke-width="1.5"/>
+          <g font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">
+            <text x="180" y="167">0%</text>
+            <text x="680" y="167" text-anchor="end">100% OF INSTALLED PLANT</text>
+          </g>
+          <text x="180" y="188" font-family="JetBrains Mono, monospace" font-size="10.5" fill="var(--muted)">NIGERIA: PLANT AVAILABILITY FACTOR · SOUTH AFRICA: ENERGY AVAILABILITY FACTOR</text>
+        </svg>
+      </div>
+      <p class="cap">The two regulators define their factors slightly differently, so treat this as close rather than exact. South Africa passed 476 consecutive days without load shedding in September 2026. Egypt runs a surplus and exports to Jordan. Sources: NERC 2026 Q1 report; Eskom system statements, 2026.</p>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="label">Unresolved</div>
+    <h2>The sources disagree on grid collapses</h2>
+    <div class="conflict">
+      <p>This page does not pick one. Both counts are published and they do not reconcile, which matters because collapse frequency is one of the few measures where the picture looks like clear improvement.</p>
+      <ul>
+        <li>One account: the grid went down almost monthly in 2024, with two major collapses in 2025.</li>
+        <li>Another: ten collapses in 2024 and four in 2025.</li>
+        <li>Both agree 2025 was better than 2024. Further collapses were reported on 29 December 2025, 23 January 2026 and in early February 2026.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="label">Limits</div>
+    <h2>What this page cannot tell you</h2>
+    <div class="lims">
+      <div class="lim"><span class="n">01</span><p><b>National megawatts are not your light.</b> Distribution, load-shedding and band classification sit between the grid and your socket. A good national quarter can coincide with a terrible month on your street. That is what the live tracker is for.</p></div>
+      <div class="lim"><span class="n">02</span><p><b>Averages hide the shape.</b> An average of 4,100 MW is consistent with steady mediocre supply and with wild swings between blackout and surplus.</p></div>
+      <div class="lim"><span class="n">03</span><p><b>Reclassification moves people between bands.</b> A household can pay more with no change in supply, or get the same hours under a different label.</p></div>
+      <div class="lim"><span class="n">04</span><p><b>Reported figures are revised.</b> Quarterly reports restate earlier numbers. Figures here are as published at the date compiled.</p></div>
+      <div class="lim"><span class="n">05</span><p><b>Off-grid supply is invisible here.</b> More than 60% of manufacturers took captive generation permits between 2024 and 2025. None of that appears in grid figures.</p></div>
+    </div>
+  </section>
+
+  <section class="sec">
+    <div class="label">Method</div>
+    <h2>Where every number came from</h2>
+    <p>All figures come from published regulatory reports or from reporting that cites them. Nothing here is modelled, estimated or interpolated. Where two sources conflict, both are shown. Where a quarter is missing, it is left out rather than filled in.</p>
+    <div class="src">
+      <a href="https://nerc.gov.ng/wp-content/uploads/2026/07/2026_Q1-Report.pdf">NERC — First Quarter 2026 Report</a>
+      <a href="https://nerc.gov.ng/wp-content/uploads/2025/07/2025_Q1_Report.pdf">NERC — First Quarter 2025 Report</a>
+      <a href="https://dailytrust.com/fact-check-did-nigerias-power-generation-exceed-6000mw-as-adelabu-claimed/">Daily Trust — Fact check on the 6,000 MW claim, April 2026</a>
+      <a href="https://www.vanguardngr.com/2026/03/electricity-how-nigeria-lost-11200mw-post-privatization/">Vanguard — Annual generation capacity series, March 2026</a>
+      <a href="https://www.energytransitionafrica.com/insights/article/why-nigeria-electricity-crisis-explained-generation-gas-tariff-liquidity">Energy Transition Africa — Generation, gas, tariff and liquidity</a>
+      <a href="https://www.eskom.co.za/eskom-fully-meets-2026-winter-demand-eaf-remains-at-its-highest-level-since-2020-67-79-and-diesel-expenditure-declines-by-r4-84-billion-or-81-64-to-deliver-energy-security/">Eskom — 2026 winter system performance</a>
+      <a href="https://allafrica.com/stories/202602020399.html">AllAfrica — Grid collapse record, February 2026</a>
+      <a href="https://nairametrics.com/2024/07/03/discos-announce-electricity-tariff-increase-for-band-a-customers">Nairametrics — Band A tariff adjustments</a>
+      <a href="https://leadership.ng/band-a-tariff-increase-analysts-flay-n2-493trn-15-month-electricity-subsidy">Leadership — Electricity subsidy figures</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>Up NEPA · Grid Record</span><span>Compiled 8 November 2026</span>
+    <span>Figures as published at that date</span><span>No affiliation with any party or agency</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var DATA={
+    installed:{r:"13,000 – 14,000 MW",w:"Nameplate capacity of every grid-connected plant added together, whether or not it is running.",e:"“Nigeria has over 13,000 megawatts of capacity.” True, and says nothing about supply."},
+    available:{r:"4,900 – 7,300 MW",w:"Capacity the plants could actually produce right now, given fuel, maintenance and plant condition.",e:"“Available capacity has risen.” True for some quarters, but it swings both ways: 5,430 MW in 2025 Q3, 4,089 MW by March 2026."},
+    peak:{r:"5,000 – 5,800 MW",w:"The single highest moment of output recorded. A snapshot, not a level that is held.",e:"“Generation hit a record high.” A peak of 5,801.84 MW was recorded on 4 March 2025. A claim of over 6,000 MW was checked and found unsupported."},
+    delivered:{r:"4,100 – 4,600 MW",w:"What the grid actually sends out, averaged over time. The number closest to lived experience.",e:"“Supply is still around 4,000 megawatts.” 2026 Q1 averaged 4,112.72 MWh/h, against 4,770.59 in 2025 Q1."}
+  };
+  var btns=Array.prototype.slice.call(document.querySelectorAll('.switch button'));
+  var er=document.getElementById('r-range'),ew=document.getElementById('r-what'),ee=document.getElementById('r-en');
+  function sel(k){var d=DATA[k];if(!d)return;er.textContent=d.r;ew.textContent=d.w;ee.textContent=d.e;
+    btns.forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-metric')===k?'true':'false');});}
+  btns.forEach(function(b){b.addEventListener('click',function(){sel(b.getAttribute('data-metric'));});});
+})();
+</script>
+</body>
+</html>
