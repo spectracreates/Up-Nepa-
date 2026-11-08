@@ -94,3 +94,18 @@ input[type=search]:focus-visible{outline:2px solid var(--on);outline-offset:1px}
 .leaflet-container{font-family:var(--body);background:var(--panel)}
 @media (prefers-color-scheme:dark){.leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* Promo cards — entry points to the game and the grid record */
+.promo{display:grid;gap:6px;padding:16px;border-radius:18px;border:1.5px solid var(--on);
+  background:linear-gradient(180deg,color-mix(in srgb,var(--on) 13%,transparent),transparent);
+  text-decoration:none;color:inherit;position:relative;overflow:hidden;
+  transition:transform .12s ease,border-color .18s ease}
+.promo:active{transform:scale(.985)}
+.promo.alt{border-color:var(--line);background:var(--panel)}
+.promo-k{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--on)}
+.promo.alt .promo-k{color:var(--muted)}
+.promo strong{font-family:var(--display);font-weight:800;font-size:22px;line-height:1.1;letter-spacing:-.015em;text-wrap:balance}
+.promo-s{font-size:14px;color:var(--muted);text-wrap:pretty}
+.promo-go{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--on);margin-top:2px}
+.promo.alt .promo-go{color:var(--ink)}
+.promo:focus-visible{outline:2px solid var(--on);outline-offset:3px}
