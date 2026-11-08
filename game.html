@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Run The Grid · Up NEPA</title>
+<meta name="description" content="You are Nigeria's system operator for 24 hours. Real capacity, real gas supply, real frequency limits. Try not to collapse the grid.">
+<meta name="theme-color" content="#121410">
+<meta property="og:title" content="Run The Grid — can you keep Nigeria's lights on for 24 hours?">
+<meta property="og:description" content="4,112MW. Six regions that want 5,300. Keep the frequency at 50Hz or the whole country goes dark.">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap">
+<style>
+:root{
+  --bg:#121410;--panel:#1b1e18;--ink:#ecebe2;--muted:#9a9d8f;--line:#2d3128;
+  --on:#ffcc1f;--off:#323832;--mix:#e08a55;--ok:#5fcf86;--bad:#ff5c47;
+  --lcd:#3b4a22;--lcd-ink:#d9f08c;
+  --display:"Bricolage Grotesque",Georgia,serif;--body:"Figtree",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:780px;margin:0 auto;padding:calc(14px + env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) calc(28px + env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));display:grid;gap:14px}
+
+.top{display:flex;justify-content:space-between;align-items:center}
+.brand{font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:-.02em}
+.brand span{color:var(--on);-webkit-text-stroke:1.2px var(--ink)}
+.top a{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none}
+
+/* ---------- start / end screens ---------- */
+.screen{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:26px 22px;display:grid;gap:16px}
+.screen h1{font-family:var(--display);font-weight:800;font-size:clamp(34px,9vw,52px);line-height:.98;letter-spacing:-.03em;text-wrap:balance}
+.screen h2{font-family:var(--display);font-weight:800;font-size:clamp(28px,7.5vw,42px);line-height:1;letter-spacing:-.02em}
+.screen p{max-width:52ch;color:var(--muted)}
+.screen p b{color:var(--ink);font-weight:600}
+.brief{display:grid;gap:9px;font-family:var(--mono);font-size:13px}
+.brief div{display:flex;gap:11px;align-items:baseline}
+.brief i{color:var(--on);font-style:normal;flex:none}
+.cta{all:unset;background:var(--on);color:#2a2000;font-weight:600;font-size:17px;padding:15px 26px;border-radius:999px;text-align:center;cursor:pointer;transition:transform .12s ease,filter .12s ease;justify-self:start}
+.cta:hover{filter:brightness(1.08)}
+.cta:active{transform:scale(.97)}
+.cta.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500;font-size:15px;padding:13px 22px}
+.cta:focus-visible,.reg:focus-visible{outline:2px solid var(--on);outline-offset:3px}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ---------- dashboard ---------- */
+.dash{background:var(--lcd);color:var(--lcd-ink);border-radius:14px;padding:14px;font-family:var(--mono);display:grid;gap:10px;box-shadow:inset 0 2px 0 rgba(0,0,0,.14);position:relative;overflow:hidden}
+.dash.warn{animation:warnpulse .8s ease-in-out infinite}
+@keyframes warnpulse{0%,100%{box-shadow:inset 0 2px 0 rgba(0,0,0,.14),inset 0 0 0 0 rgba(255,92,71,0)}50%{box-shadow:inset 0 2px 0 rgba(0,0,0,.14),inset 0 0 0 4px rgba(255,92,71,.55)}}
+.dashTop{display:flex;justify-content:space-between;font-size:11px;letter-spacing:.09em;text-transform:uppercase;opacity:.85}
+.freqWrap{display:flex;align-items:center;gap:16px}
+.freqNum{font-size:clamp(40px,13vw,62px);line-height:1;font-variant-numeric:tabular-nums;font-weight:600;transition:color .2s ease}
+.freqNum.hot{color:#ffb9ae}
+.freqMeta{display:grid;gap:3px;font-size:11px;letter-spacing:.07em;text-transform:uppercase;opacity:.9}
+.bar{height:12px;border-radius:999px;background:rgba(0,0,0,.3);position:relative;overflow:hidden}
+.bar i{position:absolute;top:0;bottom:0;width:3px;background:var(--lcd-ink);border-radius:2px;transition:left .12s linear}
+.bar u{position:absolute;top:0;bottom:0;left:33.3%;width:33.4%;background:rgba(217,240,140,.18)}
+.bar.danger i{background:#ff8f7d}
+.gauges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.g{background:rgba(0,0,0,.22);border-radius:9px;padding:8px 10px;display:grid;gap:2px;min-width:0}
+.g .gk{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.75}
+.g .gv{font-size:19px;font-variant-numeric:tabular-nums;line-height:1.15}
+.g .gv.sh{color:#ffb9ae}
+
+/* ---------- regions ---------- */
+.gridHead{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.regions{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px}
+.reg{all:unset;cursor:pointer;background:var(--panel);border:1.5px solid var(--line);border-radius:14px;padding:12px 13px;display:grid;gap:5px;min-width:0;position:relative;overflow:hidden;transition:border-color .16s ease,background .16s ease,transform .1s ease}
+.reg:active{transform:scale(.975)}
+.reg .rn{font-family:var(--display);font-weight:800;font-size:18px;letter-spacing:-.01em}
+.reg .rl{font-family:var(--mono);font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.reg .rs{font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+.reg.on{border-color:var(--on);background:linear-gradient(180deg,rgba(255,204,31,.14),rgba(255,204,31,.04))}
+.reg.on .rn{color:var(--on)}
+.reg.on .rs{color:var(--on)}
+.reg.fault{border-color:var(--bad);opacity:.62;cursor:not-allowed}
+.reg.fault .rs{color:var(--bad)}
+.reg .glow{position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(255,204,31,.4),transparent 70%);opacity:0;transition:opacity .3s ease;pointer-events:none}
+.reg.on .glow{opacity:1}
+
+/* ---------- ticker ---------- */
+.ticker{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--on);border-radius:12px;padding:11px 13px;font-family:var(--mono);font-size:12.5px;min-height:44px;display:flex;align-items:center;gap:9px}
+.ticker.alarm{border-left-color:var(--bad);animation:shake .4s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.ticker b{color:var(--on);font-weight:600}
+.ticker.alarm b{color:var(--bad)}
+
+/* ---------- clock strip ---------- */
+.hours{display:flex;gap:2px;height:28px}
+.hours i{flex:1 1 0;background:var(--off);border-radius:2px;transition:background .25s ease,transform .25s ease;transform-origin:bottom}
+.hours i.done{background:var(--on)}
+.hours i.part{background:var(--mix)}
+.hours i.now{transform:scaleY(1.22)}
+
+/* ---------- end ---------- */
+.scoreGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:9px}
+.sc{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:3px}
+.sc .sk{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.sc .sv{font-family:var(--mono);font-size:24px;font-variant-numeric:tabular-nums}
+.verdict{font-family:var(--display);font-weight:800;font-size:clamp(22px,5.5vw,30px);line-height:1.1;color:var(--on)}
+.shareBox{background:var(--bg);border:1px dashed var(--line);border-radius:12px;padding:13px;font-family:var(--mono);font-size:13px;white-space:pre-wrap;color:var(--muted)}
+.foot{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-top:1.5px solid var(--line);padding-top:12px;display:flex;flex-wrap:wrap;gap:6px 16px}
+.foot a{color:inherit}
+.flash{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;z-index:50;transition:opacity .1s linear}
+.flash.go{opacity:1;transition:opacity .45s ease}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="flash" id="flash"></div>
+<div class="wrap">
+
+  <div class="top">
+    <div class="brand">Up <span>NEPA</span></div>
+    <a href="./">← Live status</a>
+  </div>
+
+  <!-- ===== START ===== -->
+  <section class="screen" id="start">
+    <h1>Run The Grid</h1>
+    <p>For the next 24 hours you are Nigeria's system operator. <b>Six regions want more power than you have.</b> You decide who gets it and who sits in darkness.</p>
+    <div class="brief">
+      <div><i>▸</i><span>You have about <b>4,112 MW</b>. Peak demand reaches <b>5,300 MW</b>.</span></div>
+      <div><i>▸</i><span>Switch a feeder off and that region goes dark. Leave too many on and you <b>draw more than you have</b>.</span></div>
+      <div><i>▸</i><span>Draw too much and frequency falls. Below <b>49.00 Hz</b> the grid collapses and everyone goes dark.</span></div>
+      <div><i>▸</i><span>Gas supply fails without warning. Plants trip. Keep up.</span></div>
+    </div>
+    <button class="cta" id="btnStart">Take the desk</button>
+    <p style="font-size:13px">Capacity, gas shortfall and frequency limits are Nigeria's real 2026 Q1 figures. <a href="record.html" style="color:var(--on)">See the data →</a></p>
+  </section>
+
+  <!-- ===== GAME ===== -->
+  <section id="game" hidden style="display:grid;gap:14px">
+    <div class="dash" id="dash">
+      <div class="dashTop"><span id="clock">00:00</span><span id="dayLbl">Hour 1 of 24</span></div>
+      <div class="freqWrap">
+        <div class="freqNum" id="freq">50.00</div>
+        <div class="freqMeta">
+          <span>Hz · system frequency</span>
+          <span id="freqState">Stable</span>
+        </div>
+      </div>
+      <div class="bar" id="bar"><u></u><i id="needle" style="left:50%"></i></div>
+      <div class="gauges">
+        <div class="g"><span class="gk">Available</span><span class="gv" id="gAvail">4,112</span></div>
+        <div class="g"><span class="gk">Allocated</span><span class="gv" id="gAlloc">0</span></div>
+        <div class="g"><span class="gk">Shed</span><span class="gv sh" id="gShed">0</span></div>
+      </div>
+    </div>
+
+    <div class="hours" id="hours"></div>
+
+    <div class="ticker" id="ticker"><b>00:00</b><span id="tickerText">Night load is light, so everyone has power. It will not last. Watch the frequency.</span></div>
+
+    <div class="gridHead"><span>Feeders</span><span id="demandLbl">Demand 0 MW</span></div>
+    <div class="regions" id="regions"></div>
+  </section>
+
+  <!-- ===== END ===== -->
+  <section class="screen" id="end" hidden>
+    <h2 id="endTitle">Blackout</h2>
+    <div class="verdict" id="verdict"></div>
+    <p id="endBlurb"></p>
+    <div class="scoreGrid">
+      <div class="sc"><span class="sk">Hours survived</span><span class="sv" id="sHours">0</span></div>
+      <div class="sc"><span class="sk">Energy delivered</span><span class="sv" id="sEnergy">0</span></div>
+      <div class="sc"><span class="sk">Demand met</span><span class="sv" id="sMet">0%</span></div>
+      <div class="sc"><span class="sk">Darkness caused</span><span class="sv" id="sDark">0</span></div>
+    </div>
+    <div class="shareBox" id="shareBox"></div>
+    <div class="row">
+      <button class="cta" id="btnAgain">Run it again</button>
+      <button class="cta ghost" id="btnCopy">Copy result</button>
+      <a class="cta ghost" href="record.html" style="text-decoration:none">See the real numbers</a>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>Up NEPA · Run The Grid</span>
+    <span>Figures from NERC 2026 Q1</span>
+    <a href="record.html">The grid record</a>
+  </footer>
+</div>
+
+<script>
+(function(){
+  var REGIONS=[
+    {id:"lagos",name:"Lagos",base:1250,pop:"20m"},
+    {id:"ibadan",name:"Ibadan",base:900,pop:"9m"},
+    {id:"abuja",name:"Abuja",base:620,pop:"4m"},
+    {id:"ph",name:"Port Harcourt",base:560,pop:"3m"},
+    {id:"kano",name:"Kano",base:480,pop:"4m"},
+    {id:"enugu",name:"Enugu",base:420,pop:"2m"}
+  ];
+  // hourly demand multiplier, 00:00 -> 23:00
+  var CURVE=[.74,.70,.68,.68,.72,.80,.90,.97,1.00,1.00,.99,1.00,1.02,1.00,.98,.99,1.04,1.12,1.22,1.25,1.20,1.08,.95,.82];
+
+  var EVENTS=[
+    {h:3, t:"gas",  d:-480, msg:"Gas supply to Egbin cut. Available capacity down 480 MW."},
+    {h:7, t:"up",   d:320,  msg:"Afam unit back on bars. 320 MW returned."},
+    {h:11,t:"gas",  d:-360, msg:"Gas pressure drop at Delta. 360 MW lost."},
+    {h:14,t:"fault",region:"ph",msg:"Transmission fault. Port Harcourt feeder forced off."},
+    {h:17,t:"up",   d:410,  msg:"Jebba hydro ramping up. 410 MW available."},
+    {h:19,t:"gas",  d:-520, msg:"Evening peak and gas is short. 520 MW off the table."},
+    {h:22,t:"up",   d:250,  msg:"Load easing. 250 MW recovered."}
+  ];
+
+  var S={};
+  var elGame=document.getElementById('game'),elStart=document.getElementById('start'),elEnd=document.getElementById('end');
+  var elFreq=document.getElementById('freq'),elNeedle=document.getElementById('needle'),elBar=document.getElementById('bar');
+  var elDash=document.getElementById('dash'),elClock=document.getElementById('clock'),elDay=document.getElementById('dayLbl');
+  var elAvail=document.getElementById('gAvail'),elAlloc=document.getElementById('gAlloc'),elShed=document.getElementById('gShed');
+  var elRegions=document.getElementById('regions'),elHours=document.getElementById('hours');
+  var elTicker=document.getElementById('ticker'),elTickText=document.getElementById('tickerText');
+  var elDemand=document.getElementById('demandLbl'),elFreqState=document.getElementById('freqState');
+  var elFlash=document.getElementById('flash');
+
+  var HOUR_MS=2300, raf=null, last=0, acc=0;
+
+  function fmt(n){return Math.round(n).toLocaleString('en-US');}
+
+  function build(){
+    elRegions.innerHTML='';
+    REGIONS.forEach(function(r){
+      var b=document.createElement('button');
+      b.className='reg';b.type='button';b.dataset.id=r.id;
+      b.innerHTML='<span class="glow"></span><span class="rn">'+r.name+'</span>'+
+        '<span class="rl" data-load>'+fmt(r.base)+' MW</span>'+
+        '<span class="rs" data-state>OFF · '+r.pop+'</span>';
+      b.addEventListener('click',function(){toggle(r.id);});
+      elRegions.appendChild(b);
+    });
+    elHours.innerHTML='';
+    for(var i=0;i<24;i++){var s=document.createElement('i');elHours.appendChild(s);}
+  }
+
+  function reset(){
+    S={hour:0,t:0,freq:50,avail:4112,delivered:0,demandTotal:0,darkMWh:0,alive:true,fired:{},shedNow:0,grace:3};
+    S.on={};S.fault={};
+    // Night demand sits below capacity, so everyone starts with light. The squeeze arrives later.
+    REGIONS.forEach(function(r){S.on[r.id]=true;S.fault[r.id]=false;});
+    elFlash.classList.remove('go');
+    document.querySelectorAll('.reg').forEach(function(b){b.className='reg';});
+    for(var i=0;i<24;i++){elHours.children[i].className='';}
+    say('00:00','Night load is light, so everyone has power. It will not last. Watch the frequency.',false);
+  }
+
+  function loadOf(r){return r.base*CURVE[S.hour];}
+  function demandNow(){var t=0;REGIONS.forEach(function(r){t+=loadOf(r);});return t;}
+  function allocNow(){var t=0;REGIONS.forEach(function(r){if(S.on[r.id]&&!S.fault[r.id])t+=loadOf(r);});return t;}
+
+  function toggle(id){
+    if(!S.alive||S.fault[id])return;
+    S.on[id]=!S.on[id];
+    paintRegions();
+  }
+
+  function paintRegions(){
+    REGIONS.forEach(function(r){
+      var b=elRegions.querySelector('[data-id="'+r.id+'"]');
+      if(!b)return;
+      var on=S.on[r.id]&&!S.fault[r.id];
+      b.className='reg'+(on?' on':'')+(S.fault[r.id]?' fault':'');
+      b.querySelector('[data-load]').textContent=fmt(loadOf(r))+' MW';
+      b.querySelector('[data-state]').textContent=(S.fault[r.id]?'FAULT':(on?'ON':'OFF'))+' · '+r.pop;
+    });
+  }
+
+  function say(tag,text,alarm){
+    elTicker.innerHTML='<b>'+tag+'</b><span>'+text+'</span>';
+    elTicker.classList.toggle('alarm',!!alarm);
+    if(alarm){elTicker.classList.remove('alarm');void elTicker.offsetWidth;elTicker.classList.add('alarm');}
+  }
+
+  function tickHour(){
+    S.hour++;
+    if(S.hour>=24){finish(true);return;}
+    elHours.children[S.hour-1].className='done';
+    for(var i=0;i<24;i++){elHours.children[i].classList.toggle('now',i===S.hour);}
+    // events
+    EVENTS.forEach(function(e,idx){
+      if(e.h===S.hour&&!S.fired[idx]){
+        S.fired[idx]=true;
+        if(e.t==='fault'){S.fault[e.region]=true;S.on[e.region]=false;}
+        else{S.avail=Math.max(1200,S.avail+e.d);}
+        say(e.t==='up'?'RESTORED':'ALERT',e.msg,e.t!=='up');
+      }
+    });
+    if(S.hour===15&&S.fault.ph){S.fault.ph=false;say('RESTORED','Port Harcourt feeder repaired and back in service.',false);}
+    paintRegions();
+  }
+
+  function physics(dt){
+    var alloc=allocNow(), dem=demandNow();
+    S.delivered += alloc*(dt/(HOUR_MS/1000));
+    S.demandTotal += dem*(dt/(HOUR_MS/1000));
+    S.darkMWh += Math.max(0,dem-alloc)*(dt/(HOUR_MS/1000));
+    S.shedNow = Math.max(0,dem-alloc);
+    // Generation follows load, so only a shortfall moves frequency.
+    // Spare capacity simply means plants back off: no penalty for under-allocating.
+    S.grace=Math.max(0,S.grace-dt);
+    if(S.grace>0){S.freq=50;return;}
+    var deficit=Math.max(0,alloc-S.avail);
+    S.freq += (-deficit/900)*dt - (S.freq-50)*0.5*dt;
+    S.freq += (Math.random()-0.5)*0.025;
+    if(S.freq>50.25)S.freq=50.25;
+    if(S.freq<49.0){finish(false);}
+  }
+
+  function paint(){
+    var alloc=allocNow(),dem=demandNow();
+    elFreq.textContent=S.freq.toFixed(2);
+    var off=Math.abs(S.freq-50);
+    var hot=off>0.4;
+    elFreq.classList.toggle('hot',hot);
+    elDash.classList.toggle('warn',off>0.45);
+    elBar.classList.toggle('danger',hot);
+    var pct=Math.max(0,Math.min(100,((S.freq-48.9)/1.45)*100));
+    elNeedle.style.left=pct+'%';
+    elFreqState.textContent = S.grace>0?'Warming up' : off<0.12?'Stable' : off<0.4?'Drifting' : off<0.7?'Unstable' : 'CRITICAL';
+    elAvail.textContent=fmt(S.avail);
+    elAlloc.textContent=fmt(alloc);
+    elShed.textContent=fmt(Math.max(0,dem-alloc));
+    elDemand.textContent='Demand '+fmt(dem)+' MW';
+    var hh=String(S.hour).padStart(2,'0');
+    elClock.textContent=hh+':'+String(Math.floor((S.t/HOUR_MS)*60)).padStart(2,'0');
+    elDay.textContent='Hour '+(S.hour+1)+' of 24';
+  }
+
+  function loop(ts){
+    if(!S.alive)return;
+    if(!last)last=ts;
+    var dtms=Math.min(120,ts-last);last=ts;
+    S.t+=dtms;
+    physics(dtms/1000);
+    if(S.t>=HOUR_MS){S.t-=HOUR_MS;tickHour();}
+    if(S.alive){paint();raf=requestAnimationFrame(loop);}
+  }
+
+  function finish(survived){
+    S.alive=false;
+    if(raf)cancelAnimationFrame(raf);
+    var hours=S.hour+(survived?0:S.t/HOUR_MS);
+    var gwh=S.delivered/1000;
+    var met=S.demandTotal>0?(S.delivered/S.demandTotal)*100:0;
+    document.getElementById('sHours').textContent=hours.toFixed(1);
+    document.getElementById('sEnergy').textContent=gwh.toFixed(1)+' GWh';
+    document.getElementById('sMet').textContent=met.toFixed(0)+'%';
+    document.getElementById('sDark').textContent=(S.darkMWh/1000).toFixed(1)+' GWh';
+
+    var title,verdict,blurb;
+    if(!survived){
+      title='System collapse';
+      verdict='You lasted '+hours.toFixed(1)+' hours.';
+      blurb='Frequency left the safe band and the grid tripped. Nigeria recorded several of these in 2024 and 2025 — the sources disagree on exactly how many, which tells you something on its own.';
+      elFlash.classList.add('go');
+      setTimeout(function(){elFlash.classList.remove('go');},700);
+    }else if(met>=72){
+      title='You made it';
+      verdict='24 hours, '+met.toFixed(0)+'% of demand met.';
+      blurb='Better than the real grid managed. You still left '+(S.darkMWh/1000).toFixed(1)+' GWh of demand in the dark, because the power to meet it does not exist.';
+    }else{
+      title='You made it';
+      verdict='24 hours, '+met.toFixed(0)+'% of demand met.';
+      blurb='The grid held, which is the job. The gap you could not close is the real story: Nigeria has 13,625 MW installed and delivers around 4,100.';
+    }
+    document.getElementById('endTitle').textContent=title;
+    document.getElementById('verdict').textContent=verdict;
+    document.getElementById('endBlurb').textContent=blurb;
+    document.getElementById('shareBox').textContent=
+      'Run The Grid — '+(survived?'survived 24 hours':'collapsed after '+hours.toFixed(1)+'h')+'\n'+
+      met.toFixed(0)+'% of demand met · '+gwh.toFixed(1)+' GWh delivered\n'+
+      'Nigeria\'s real numbers. Try it.';
+    elGame.hidden=true;elEnd.hidden=false;
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+
+  function start(){
+    reset();
+    elStart.hidden=true;elEnd.hidden=true;elGame.hidden=false;
+    paintRegions();paint();
+    last=0;raf=requestAnimationFrame(loop);
+  }
+
+  document.getElementById('btnStart').addEventListener('click',start);
+  document.getElementById('btnAgain').addEventListener('click',start);
+  document.getElementById('btnCopy').addEventListener('click',function(){
+    var t=document.getElementById('shareBox').textContent;
+    var b=this;
+    try{
+      navigator.clipboard.writeText(t).then(function(){b.textContent='Copied';setTimeout(function(){b.textContent='Copy result';},1600);},
+      function(){b.textContent='Select it above';setTimeout(function(){b.textContent='Copy result';},1600);});
+    }catch(e){b.textContent='Select it above';setTimeout(function(){b.textContent='Copy result';},1600);}
+  });
+
+  build();reset();paintRegions();
+})();
+</script>
+</body>
+</html>
